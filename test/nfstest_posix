@@ -684,8 +684,13 @@ class PosixTest(TestUtil):
         sleep(1)
 
         self.get_filename()
-        self.dprint('DBG3', "Create link %s -> %s using POSIX API link()" % (self.absfile, srcfile))
-        posix.link(srcfile, self.absfile)
+        try:
+            self.dprint('DBG3', "Create link %s -> %s using POSIX API link()" % (self.absfile, srcfile))
+            posix.link(srcfile, self.absfile)
+        except Exception, ex:
+            msg = "Posix create link failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
         lstat = os.stat(srcfile)
         fstat = os.stat(srcfile)
         dstat = os.stat(self.mtdir)
@@ -913,7 +918,12 @@ class PosixTest(TestUtil):
 
         self.get_filename()
         self.dprint('DBG3', "Creating symbolic link to directory [%s -> %s]" % (self.absfile, abstopdir))
-        os.symlink(abstopdir, self.absfile)
+        try:
+            os.symlink(abstopdir, self.absfile)
+        except Exception, ex:
+            msg = "symlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
         try:
             posix.mkdir(self.absfile, mode)
         except OSError as e:
@@ -1334,7 +1344,12 @@ class PosixTest(TestUtil):
         srcfile = self.absfile
         self.get_filename()
         self.dprint('DBG3', "Creating symbolic link to file [%s -> %s]" % (self.absfile, srcfile))
-        os.symlink(srcfile, self.absfile)
+        try:
+            os.symlink(srcfile, self.absfile)
+        except Exception, ex:
+            msg = "symlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
         data = posix.readlink(self.absfile)
         self.test(data == srcfile, "readlink - data of symbolic link should be the name of the source file")
 
@@ -1342,7 +1357,12 @@ class PosixTest(TestUtil):
         srcdir = self.absdir
         self.get_filename()
         self.dprint('DBG3', "Creating symbolic link to directory [%s -> %s]" % (self.absfile, srcdir))
-        os.symlink(srcdir, self.absfile)
+        try:
+            os.symlink(srcdir, self.absfile)
+        except Exception, ex:
+            msg = "symlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
         data = posix.readlink(self.absfile)
         self.test(data == srcdir, "readlink - data of symbolic link should be the name of the source directory")
 
@@ -1375,7 +1395,12 @@ class PosixTest(TestUtil):
         srcfile = self.absfile
         self.get_filename()
         self.dprint('DBG3', "Creating symbolic link [%s -> %s]" % (self.absfile, srcfile))
-        os.symlink(srcfile, self.absfile)
+        try:
+            os.symlink(srcfile, self.absfile)
+        except Exception, ex:
+            msg = "symlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
         oldname = self.absfile
         self.get_filename()
         self.dprint('DBG3', "Rename symbolic link %s to %s using POSIX API rename()" % (oldname, self.absfile))
@@ -1466,7 +1491,12 @@ class PosixTest(TestUtil):
         srcfile = self.abspath(self.files[0])
         self.get_filename()
         self.dprint('DBG3', "Create symbolic link %s -> %s using POSIX API symlink()" % (self.absfile, srcfile))
-        posix.symlink(srcfile, self.absfile)
+        try:
+            posix.symlink(srcfile, self.absfile)
+        except Exception, ex:
+            msg = "Posix symlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
         lstat = os.lstat(self.absfile)
         rlink = os.readlink(self.absfile)
         self.test(lstat != None, "symlink - symbolic link should be created")
@@ -1603,7 +1633,12 @@ class PosixTest(TestUtil):
         self.create_file()
         srcfile = self.absfile
         self.get_filename()
-        os.symlink(srcfile, self.absfile)
+        try:
+            os.symlink(srcfile, self.absfile)
+        except Exception, ex:
+            msg = "symlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
         self.dprint('DBG3', "Remove symbolic link %s using POSIX API unlink()" % self.absfile)
         posix.unlink(self.absfile)
         self.test(not os.path.exists(self.absfile), "unlink - symbolic link should be removed")
