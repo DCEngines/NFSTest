@@ -25,6 +25,7 @@ import traceback
 from time import sleep
 import nfstest_config as c
 from nfstest.test_util import TestUtil
+from inspect import currentframe, getframeinfo
 
 # Module constants
 __author__    = "Jorge Mora (%s)" % c.NFSTEST_AUTHOR_EMAIL
@@ -100,6 +101,16 @@ access_names = {
     posix.W_OK: 'W_OK',
     posix.X_OK: 'X_OK',
 }
+
+frInfo = getframeinfo(currentframe())
+
+
+def dcePrintExceptionInfo(msg, ex):
+    global frInfo
+    print('DCE [%s -> %s:%s]: %s' % (frInfo.filename, frInfo.function, frInfo.lineno, msg))
+    #print traceback.print_tb()
+    print ex.message
+
 
 def access_str(mode):
     """Convert the access mode bitmap to its string representation."""
@@ -834,15 +845,27 @@ class PosixTest(TestUtil):
         srcfile = testfile
         self.get_filename()
         self.dprint('DBG3', "Creating symbolic link to file [%s -> %s]" % (self.absfile, srcfile))
-        os.symlink(srcfile, self.absfile)
-        self._stat_obj(0754, stat_mode=stat_mode, type='symbolic link', srcfile=srcfile)
+
+        try:
+            os.symlink(srcfile, self.absfile)
+            self._stat_obj(0754, stat_mode=stat_mode, type='symbolic link', srcfile=srcfile)
+        except Exception, ex:
+            msg = "symlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
 
         self.test_info("Symbolic link to a directory")
         srcfile = testdir
         self.get_filename()
         self.dprint('DBG3', "Creating symbolic link to directory [%s -> %s]" % (self.absfile, srcfile))
-        os.symlink(srcfile, self.absfile)
-        self._stat_obj(0755, stat_mode=stat_mode, type='symbolic link', srcfile=srcfile, srctype='directory')
+        try:
+            os.symlink(srcfile, self.absfile)
+            self._stat_obj(0755, stat_mode=stat_mode, type='symbolic link', srcfile=srcfile, srctype='directory')
+        except Exception, ex:
+            msg = "symlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
+
 
     def lstat_test(self):
         """Verify POSIX API lstat() by checking the mode on a file and that
