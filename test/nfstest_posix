@@ -109,7 +109,8 @@ def dcePrintExceptionInfo(msg, ex):
     global frInfo
     print('DCE [%s -> %s:%s]: %s' % (frInfo.filename, frInfo.function, frInfo.lineno, msg))
     #print traceback.print_tb()
-    print ex.message
+    #print ex.message
+    #print traceback.print_exc()
 
 
 def access_str(mode):
@@ -1099,7 +1100,12 @@ class PosixTest(TestUtil):
                     srcfile = self.absfile
                     self.get_filename()
                     self.dprint('DBG3', "Creating symbolic link file [%s -> %s]" % (self.absfile, srcfile))
-                    os.symlink(srcfile, self.absfile)
+                    try:
+                        os.symlink(srcfile, self.absfile)
+                    except Exception, ex:
+                        msg = "symlink failed!"
+                        dcePrintExceptionInfo(msg, ex)
+                        pass
 
             # Get the name for file under test
             filename = os.path.basename(self.absfile)
@@ -1126,7 +1132,12 @@ class PosixTest(TestUtil):
 
                     if ftype in [EXISTENT, SYMLINK]:
                         # Get file stats before open
-                        ofstat = os.stat(self.absfile)
+                        try:
+                            ofstat = os.stat(self.absfile)
+                        except Exception, ex:
+                            msg = "stat failed!"
+                            dcePrintExceptionInfo(msg, ex)
+                            pass
 
                     try:
                         openerr = None
@@ -1350,8 +1361,14 @@ class PosixTest(TestUtil):
             msg = "symlink failed!"
             dcePrintExceptionInfo(msg, ex)
             pass
-        data = posix.readlink(self.absfile)
-        self.test(data == srcfile, "readlink - data of symbolic link should be the name of the source file")
+
+        try:
+            data = posix.readlink(self.absfile)
+            self.test(data == srcfile, "readlink - data of symbolic link should be the name of the source file")
+        except Exception, ex:
+            msg = "readlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
 
         self.create_dir()
         srcdir = self.absdir
@@ -1363,8 +1380,13 @@ class PosixTest(TestUtil):
             msg = "symlink failed!"
             dcePrintExceptionInfo(msg, ex)
             pass
-        data = posix.readlink(self.absfile)
-        self.test(data == srcdir, "readlink - data of symbolic link should be the name of the source directory")
+        try:
+            data = posix.readlink(self.absfile)
+            self.test(data == srcdir, "readlink - data of symbolic link should be the name of the source directory")
+        except Exception, ex:
+            msg = "readlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
 
     def rename_test(self):
         """Verify POSIX API rename() by renaming a file, directory, and a
@@ -1387,9 +1409,14 @@ class PosixTest(TestUtil):
         oldname = self.absdir
         self.get_dirname()
         self.dprint('DBG3', "Rename directory %s to %s using POSIX API rename()" % (oldname, self.absdir))
-        posix.rename(oldname, self.absdir)
-        self.test(os.path.exists(self.absdir), "rename - new directory name should exist")
-        self.test(not os.path.exists(oldname), "rename - old directory name should not exist")
+        try:
+            posix.rename(oldname, self.absdir)
+            self.test(os.path.exists(self.absdir), "rename - new directory name should exist")
+            self.test(not os.path.exists(oldname), "rename - old directory name should not exist")
+        except Exception, ex:
+            msg = "rename failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
 
         self.test_info("Rename symbolic link")
         srcfile = self.absfile
@@ -1404,7 +1431,12 @@ class PosixTest(TestUtil):
         oldname = self.absfile
         self.get_filename()
         self.dprint('DBG3', "Rename symbolic link %s to %s using POSIX API rename()" % (oldname, self.absfile))
-        posix.rename(oldname, self.absfile)
+        try:
+            posix.rename(oldname, self.absfile)
+        except Exception, ex:
+            msg = "rename failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
         self.test(os.path.exists(self.absfile), "rename - new symbolic link name should exist")
         self.test(not os.path.exists(oldname), "rename - old symbolic link name should not exist")
         self.test(os.path.islink(self.absfile), "rename - new name should be a symbolic link")
@@ -1497,11 +1529,16 @@ class PosixTest(TestUtil):
             msg = "Posix symlink failed!"
             dcePrintExceptionInfo(msg, ex)
             pass
-        lstat = os.lstat(self.absfile)
-        rlink = os.readlink(self.absfile)
-        self.test(lstat != None, "symlink - symbolic link should be created")
-        self.test(stat.S_ISLNK(lstat.st_mode), "symlink - object type should be a symbolic link")
-        self.test(rlink == srcfile, "symlink - symbolic link data should be the name of the source file")
+        try:
+            lstat = os.lstat(self.absfile)
+            rlink = os.readlink(self.absfile)
+            self.test(lstat != None, "symlink - symbolic link should be created")
+            self.test(stat.S_ISLNK(lstat.st_mode), "symlink - object type should be a symbolic link")
+            self.test(rlink == srcfile, "symlink - symbolic link data should be the name of the source file")
+        except Exception, ex:
+            msg = "lstat/readlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
 
     def _sync(self, objtype):
         """Verify POSIX API sync(), fdatasync() or fsync()."""
@@ -1640,9 +1677,14 @@ class PosixTest(TestUtil):
             dcePrintExceptionInfo(msg, ex)
             pass
         self.dprint('DBG3', "Remove symbolic link %s using POSIX API unlink()" % self.absfile)
-        posix.unlink(self.absfile)
-        self.test(not os.path.exists(self.absfile), "unlink - symbolic link should be removed")
-        self.test(os.path.exists(srcfile), "unlink - symbolic link source file should not be removed")
+        try:
+            posix.unlink(self.absfile)
+            self.test(not os.path.exists(self.absfile), "unlink - symbolic link should be removed")
+            self.test(os.path.exists(srcfile), "unlink - symbolic link source file should not be removed")
+        except Exception, ex:
+            msg = "unlink failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
 
         self.test_info("Unlink opened file")
         self.get_filename()
@@ -1662,17 +1704,27 @@ class PosixTest(TestUtil):
         srcfile = self.absfile
         self.get_filename()
         self.dprint('DBG3', "Create hard link %s to file %s" % (self.absfile, srcfile))
-        os.link(srcfile, self.absfile)
-        fstat_b = os.stat(self.absfile)
-        sleep(1)
+        try:
+            os.link(srcfile, self.absfile)
+            fstat_b = os.stat(self.absfile)
+            sleep(1)
+        except Exception, ex:
+            msg = "link failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
 
         self.dprint('DBG3', "Remove file %s using POSIX API unlink()" % srcfile)
-        posix.unlink(srcfile)
-        fstat = os.stat(self.absfile)
-        self.test(not os.path.exists(srcfile), "unlink - original file should be removed")
-        self.test(os.path.exists(self.absfile), "unlink - hard link file should not be removed")
-        self.test(fstat.st_nlink == fstat_b.st_nlink-1, "unlink - file st_nlink should be decremented by 1")
-        self.test(fstat.st_ctime > fstat_b.st_ctime, "unlink - file st_ctime should be updated")
+        try:
+            posix.unlink(srcfile)
+            fstat = os.stat(self.absfile)
+            self.test(not os.path.exists(srcfile), "unlink - original file should be removed")
+            self.test(os.path.exists(self.absfile), "unlink - hard link file should not be removed")
+            self.test(fstat.st_nlink == fstat_b.st_nlink-1, "unlink - file st_nlink should be decremented by 1")
+            self.test(fstat.st_ctime > fstat_b.st_ctime, "unlink - file st_ctime should be updated")
+        except Exception, ex:
+            msg = "link failed!"
+            dcePrintExceptionInfo(msg, ex)
+            pass
 
     def write_test(self):
         """Verify POSIX API write() by writing 0 bytes and verifying 0
