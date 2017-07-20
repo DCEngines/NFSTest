@@ -474,8 +474,12 @@ class FileIO(BaseObj):
 
     def _newname(self):
         """Create new file name"""
-        name = "%s%06X" % (self.basename, self.n_index)
-        self.n_index += 1
+	name = "%s%06X" % (self.basename, self.n_index)
+	
+	# '-flat.vmdk' file generation
+        #name = "%s%06X%s" % (self.basename, self.n_index, '-flat.vmdk')
+        
+	self.n_index += 1
         return name
 
     def _percent(self, pvalue):

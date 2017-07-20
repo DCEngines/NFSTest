@@ -350,6 +350,11 @@ class TestUtil(NFSUtil):
         hmsg = "Data directory where files are created, directory is " + \
                "created on the mount point [default: '%default']"
         self.nfs_opgroup.add_option("--datadir", default=self.datadir, help=hmsg)
+
+        # NFSG: Adding option for '-flat.vmdk' files
+        hmsg = "Flag to enable/disable creation of '-flat.vmdk' files [default: %default]"
+        self.nfs_opgroup.add_option("--enable_flat_vmdk", action = "store_true", help=hmsg)
+
         self.opts.add_option_group(self.nfs_opgroup)
 
         self.log_opgroup = OptionGroup(self.opts, "Logging options")
@@ -1205,7 +1210,13 @@ class TestUtil(NFSUtil):
 
     def get_filename(self, dir=None):
         """Return a unique file name under the given directory."""
-        self.filename = "%s_f_%d" % (self.get_name(), self.fileidx)
+
+        # '-flat.vmdk file creation change'
+        if self.enable_flat_vmdk:
+            self.filename = "%s_f_%d%s" % (self.get_name(), self.fileidx, '-flat.vmdk')
+        else:
+            self.filename = "%s_f_%d" % (self.get_name(), self.fileidx)
+        
         self.fileidx += 1
         self.absfile = self.abspath(self.filename, dir=dir)
         self.files.append(self.filename)
