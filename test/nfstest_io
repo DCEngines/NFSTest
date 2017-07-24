@@ -45,6 +45,10 @@ opts.add_option("-r", "--runtime", type="int", default=0, help="Run time [defaul
 opts.add_option("-v", "--verbose", default="none", help="Verbose level: none|info|debug|dbg1-7|all [default: '%default']")
 opts.add_option("-e", "--exiterr", action="store_true", default=False, help="Exit on first error")
 
+# NFSG: Adding option for '-flat.vmdk' files
+hmsg = "Flag to enable/disable creation of '-flat.vmdk' files [default: %default]"
+opts.add_option("--enable_flat_vmdk", action = "store_true", help=hmsg)
+
 writegroup = OptionGroup(opts, "Read and write")
 writegroup.add_option("--read",     type="float", default=P_READ,   help="Read file percentage [default: %default]")
 writegroup.add_option("--write",    type="float", default=P_WRITE,  help="Write file percentage [default: %default]")

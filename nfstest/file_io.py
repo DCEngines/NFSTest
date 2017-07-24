@@ -259,6 +259,7 @@ class FileIO(BaseObj):
         self.logdir     = kwargs.pop("logdir",     P_TMPDIR)
         self.exiterr    = kwargs.pop("exiterr",    False)
         self.minfiles   = kwargs.pop("minfiles",   str(MIN_FILES))
+        self.enable_flat_vmdk = kwargs.pop("enable_flat_vmdk", None)
 
         if self.datadir is None:
             print "Error: datadir is required"
@@ -473,13 +474,14 @@ class FileIO(BaseObj):
             self.n_files.append(fileobj)
 
     def _newname(self):
-        """Create new file name"""
-	name = "%s%06X" % (self.basename, self.n_index)
-	
-	# '-flat.vmdk' file generation
-        #name = "%s%06X%s" % (self.basename, self.n_index, '-flat.vmdk')
-        
-	self.n_index += 1
+
+        if self.enable_flat_vmdk:
+            """" '-flat.vmdk' file generation"""
+            name = "%s%06X%s" % (self.basename, self.n_index, '-flat.vmdk')
+        else:
+            """Create new file name"""
+            name = "%s%06X" % (self.basename, self.n_index)
+        self.n_index += 1
         return name
 
     def _percent(self, pvalue):
